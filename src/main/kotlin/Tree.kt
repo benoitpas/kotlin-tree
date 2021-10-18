@@ -1,6 +1,6 @@
-import Tree.Node.Leaf
+import Tree.Node.*
 
-class Tree<T> {
+object Tree {
 
     sealed class Node<T> {
         data class Leaf<T>(val dummy: Int) : Node<T>() // Cannot use object there because of generic
@@ -13,10 +13,15 @@ class Tree<T> {
         ) : Node<T>()
     }
 
-    private val leaf = Leaf<T>(0);
-
-    fun <T> addId(tree: Tree<T>): Node<Pair<T, Int>> {
-
-        return Leaf(0);
+    fun <T> addId(tree: Node<T>, index: Int): Pair<Node<Pair<T, Int>>,Int> {
+        return when (tree) {
+            is Leaf -> Pair(Leaf<Pair<T, Int>>(0), index)
+            is Branch -> {
+                val newLeft = addId<T>(tree.left, index)
+                val newValue = Pair(tree.v, newLeft.second)
+                val newRight = addId(tree.right, newLeft.second+1)
+                Pair(Branch(newValue, newLeft.first, newRight.first), newRight.second)
+            }
+        }
     }
 }
